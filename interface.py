@@ -1,4 +1,5 @@
 import tkinter
+from logging import lastResort
 from tkinter import *
 from PIL import Image, ImageOps, ImageGrab
 import numpy as np
@@ -9,25 +10,41 @@ message.pack(padx=0, pady=0)
 canvas = Canvas(root, width=600, height=500,bg="black")
 canvas.pack(padx=20, pady=20)
 root.title("Neural Network Numbers Recognition")
-
+python_white = "#fefeff"
+python_black = "#000000"
 
 
 last_x,last_y = None, None
 
 def paint(event):
-    python_black = "#ffffff"
-    x1, y1 = (event.x - 1), (event.y - 1)
-    x2, y2 = (event.x + 1), (event.y + 1)
-    canvas.create_oval(x1, y1, x2, y2, fill=python_black, outline=python_black)
+    global last_x, last_y
+    if last_x is None:
+        last_x, last_y = event.x, event.y
+        return
 
-def clear():
+    canvas.create_line(last_x, last_y, event.x, event.y, fill=python_white, width=20, capstyle=ROUND, smooth=TRUE)
+
+    last_x, last_y = event.x, event.y
+
+def reset(event=None):
+    global last_x, last_y
+    last_x, last_y = None, None
+
+def clear(event=None):
     canvas.delete("all")
+    reset()
 
 def predict():
     x = root.winfo_rootx() + canvas.winfo_x()
     y = root.winfo_rooty() + canvas.winfo_y()
     x1 = x + canvas.winfo_width()
     y1 = y + canvas.winfo_height()
+
+    try:
+        from ctypes import windll
+        windll.user32.SetProcessDPIAware()
+    except:
+        pass
 
     img = ImageGrab.grab().crop((x, y, x1, y1))
 
@@ -38,7 +55,21 @@ def predict():
 
     img_flattened = img_array.reshape(1, 784)
 
+    print("\n" + "=" * 30)
+    for row in img_array:
+        line = ""
+        for pixel in row:
+            if pixel > 0.1:
+                line += "##"
+            else:
+                line += ".."
+        print(line)
+
+    print(f"list size: {img_flattened.shape}")
+    print("=" * 30)
+
 canvas.bind('<B1-Motion>', paint)
+canvas.bind('<ButtonRelease-1>', reset)
 
 
 clear_button = tkinter.Button(root,

@@ -1,6 +1,4 @@
 import numpy as np
-#import nnfs
-#from nnfs.datasets import spiral_data
 from keras.datasets import mnist
 
 e = 2.718281828459045

@@ -1,8 +1,7 @@
 import numpy as np
-import nnfs
-from nnfs.datasets import spiral_data
-
-nnfs.init()
+#import nnfs
+#from nnfs.datasets import spiral_data
+from keras.datasets import mnist
 
 e = 2.718281828459045
 
@@ -64,28 +63,32 @@ class Loss_Categorical_Cross_Entropy(Loss): # loss prediction is the final outpu
         self.dinputs = self.dinputs / len(y_pred)
 
 class Optimizer:
-    def __init__(self, learning_rate=1.0):
+    def __init__(self, learning_rate=0.1):#-----------------------------------------------
         self.learning_rate = learning_rate
 
     def update_params(self, layer):
         layer.weights -= self.learning_rate * layer.dweights
         layer.biases -= self.learning_rate * layer.dbiases
 
+(X_train, y_train), (X_test, y_test) = mnist.load_data()
+X_t = X_test.reshape(X_test.shape[0], -1).astype("float32") / 255
+y = y_test
+X = X_t[:1000]
+y = y[:1000]
 
-X,y = spiral_data(samples=100, classes=3)
-
-dense1 = Layer_Dense(2, 64)
+dense1 = Layer_Dense(784, 64)
 activation1 = Activation_ReLU()
 
-dense2 = Layer_Dense(64,3)
+dense2 = Layer_Dense(64,10)
 activation2 = Activation_Softmax()
 
 loss_function = Loss_Categorical_Cross_Entropy()
 optimizer = Optimizer(learning_rate=1.0)
 
-for epoch in range(15000):
 
-    dense1.forward(X)
+for epoch in range(10000):
+
+    dense1.forward(X_t[:1000])
     activation1.forward(dense1.output)
     dense2.forward(activation1.output)
     activation2.forward(dense2.output)

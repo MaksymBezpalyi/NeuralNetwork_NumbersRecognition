@@ -1,7 +1,4 @@
 import numpy as np
-from keras.datasets import mnist
-
-e = 2.718281828459045
 
 class Layer_Dense:
     def __init__(self, n_inputs, n_neurons):
@@ -68,41 +65,48 @@ class Optimizer:
         layer.weights -= self.learning_rate * layer.dweights
         layer.biases -= self.learning_rate * layer.dbiases
 
-(X_train, y_train), (X_test, y_test) = mnist.load_data()
-X_t = X_test.reshape(X_test.shape[0], -1).astype("float32") / 255
-y = y_test
-X = X_t[:1000]
-y = y[:1000]
-
 dense1 = Layer_Dense(784, 64)
 activation1 = Activation_ReLU()
 
 dense2 = Layer_Dense(64,10)
 activation2 = Activation_Softmax()
 
-loss_function = Loss_Categorical_Cross_Entropy()
-optimizer = Optimizer(learning_rate=1.0)
+if __name__ == "__main__":
+    from keras.datasets import mnist
 
+    (X_train, y_train), (X_test, y_test) = mnist.load_data()
 
-for epoch in range(10000):
+    limit = 20000
+    X = X_train[:limit].reshape(limit, -1).astype("float32") / 255
+    y = y_train[:limit]
 
-    dense1.forward(X_t[:1000])
-    activation1.forward(dense1.output)
-    dense2.forward(activation1.output)
-    activation2.forward(dense2.output)
+    loss_function = Loss_Categorical_Cross_Entropy()
 
-    loss = loss_function.calculate(activation2.output, y)
+    optimizer = Optimizer(learning_rate=0.5)
 
-    predictions = np.argmax(activation2.output, axis=1)
-    accuracy = np.mean(predictions == y)
+    for epoch in range(1001):
 
-    if epoch % 1000 == 0:
-        print(f'Epoch: {epoch}, loss: {loss:.3f}, acc: {accuracy:.3f}')
+        dense1.forward(X)
+        activation1.forward(dense1.output)
+        dense2.forward(activation1.output)
+        activation2.forward(dense2.output)
 
-    loss_function.backwards(y, activation2.output)
-    dense2.backward(loss_function.dinputs)
-    activation1.backward(dense2.dinputs)
-    dense1.backward(activation1.dinputs)
+        predictions = np.argmax(activation2.output, axis=1)
+        accuracy = np.mean(predictions == y)
+        loss = loss_function.calculate(activation2.output, y)
 
-    optimizer.update_params(dense1)
-    optimizer.update_params(dense2)
+        if epoch % 100 == 0:
+            print(f'Epoch: {epoch}, loss: {loss:.3f}, acc: {accuracy:.3f}')
+
+        loss_function.backwards(y, activation2.output)
+        dense2.backward(loss_function.dinputs)
+        activation1.backward(dense2.dinputs)
+        dense1.backward(activation1.dinputs)
+
+        optimizer.update_params(dense1)
+        optimizer.update_params(dense2)
+
+    np.save('w1.npy', dense1.weights)
+    np.save('b1.npy', dense1.biases)
+    np.save('w2.npy', dense2.weights)
+    np.save('b2.npy', dense2.biases)

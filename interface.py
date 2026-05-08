@@ -2,7 +2,7 @@ import tkinter
 from tkinter import *
 from PIL import Image, ImageDraw, ImageOps, ImageFilter
 import numpy as np
-from nueral_network import Layer_Dense, Activation_ReLU, Activation_Softmax, dense1, activation1, dense2, activation2
+from neural_network import Layer_Dense, Activation_ReLU, Activation_Softmax, dense1, activation1, dense2, activation2
 
 try:
     dense1.weights = np.load('w1.npy')

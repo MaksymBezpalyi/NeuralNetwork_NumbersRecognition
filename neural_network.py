@@ -76,7 +76,7 @@ if __name__ == "__main__":
 
     (X_train, y_train), (X_test, y_test) = mnist.load_data()
 
-    limit = 20000
+    limit = 40000
     X = X_train[:limit].reshape(limit, -1).astype("float32") / 255
     y = y_train[:limit]
 
